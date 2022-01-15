@@ -1,6 +1,6 @@
 package sb_rest.dao;
 
-import org.hibernate.Session;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import sb_rest.entity.Employee;
@@ -16,27 +16,23 @@ public class EmployeeDAOImpl implements EmployeeDAO {
 
     @Override
     public List<Employee> getAllEmployees() {
-        Session session = entityManager.unwrap(Session.class);
-        List<Employee> allEmployees = session.createQuery("from Employee", Employee.class).getResultList();
-        return allEmployees;
-    }
-
-    @Override
-    public void saveEmployee(Employee emp) {
-        Session session = entityManager.unwrap(Session.class);
-        session.saveOrUpdate(emp);
+        return entityManager.createQuery("from Employee ").getResultList();
     }
 
     @Override
     public Employee getEmployee(int id) {
-        Session session = entityManager.unwrap(Session.class);
-        return session.get(Employee.class, id);
+        return entityManager.find(Employee.class, id);
+    }
+
+    @Override
+    public void saveEmployee(Employee emp) {
+        Employee newEmp = entityManager.merge(emp); // не возвращает назначенный Id при Добавлении сущности
+        emp.setId(newEmp.getId()); // только для responce
     }
 
     @Override
     public void deleteEmployee(int id) {
-        Session session = entityManager.unwrap(Session.class);
-        session.createQuery("delete from Employee where id=:emp_id")
+        entityManager.createQuery("delete from Employee where id=:emp_id")
                 .setParameter("emp_id", id)
                 .executeUpdate();
     }
